@@ -409,7 +409,9 @@
 
 ---
 # ERD
-![스크린샷 2024-11-14 오후 9 32 55](https://github.com/user-attachments/assets/75dd7a7a-3cfb-4273-8d83-650c65736ccc)
+
+![스크린샷 2024-11-27 오후 8 19 46](https://github.com/user-attachments/assets/090b7b54-0dc9-4493-8c9f-8ba790c38c02)
+
 
 
 
