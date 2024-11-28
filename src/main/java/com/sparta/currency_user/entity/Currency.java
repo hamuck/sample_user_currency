@@ -18,7 +18,7 @@ public class Currency {
     private BigDecimal exchangeRate;
     private String symbol;
 
-    @OneToMany(mappedBy = "currency")
+    @OneToMany(mappedBy = "currency",cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<UserCurrency> userCurrencyList = new ArrayList<>();
 
 

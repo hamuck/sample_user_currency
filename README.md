@@ -386,7 +386,7 @@
   "toCurrencyName": "달러",
   "amountInkrw": 1000,
   "amountAfterExchange" : 250.0,
-  "status" : "fail"
+  "status" : "cancelled"
 }
 ```
 ---
