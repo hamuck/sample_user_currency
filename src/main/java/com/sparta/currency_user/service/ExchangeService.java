@@ -10,5 +10,4 @@ public interface ExchangeService {
     List<ExchangeResponseDto> findByUserId(Long id);
 
     ExchangeResponseDto updateStatus(Long id);
-    void delete(Long id);
 }

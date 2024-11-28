@@ -34,10 +34,4 @@ public class ExchangeController {
         return new ResponseEntity<>(exchangeResponseDto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteExchange(@PathVariable Long id){
-        exchangeService.delete(id);
-        return new ResponseEntity<>("정상적으로 삭제되었습니다.", HttpStatus.OK);
-    }
-
 }
