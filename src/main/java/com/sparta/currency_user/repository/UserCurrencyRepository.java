@@ -8,13 +8,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface ExchangeRepository extends JpaRepository<UserCurrency, Long> {
+public interface UserCurrencyRepository extends JpaRepository<UserCurrency, Long> {
     @Query(
             "SELECT new com.sparta.currency_user.dto.ExchangeResponseDto(uc)"+
-                    "from UserCurrency AS uc WHERE uc.user= :user"
+                    "FROM UserCurrency AS uc WHERE uc.user= :user"
     )
     List<ExchangeResponseDto> findAllByUser(@Param("user") User user);
+
+    @Query("SELECT COUNT(uc) "+
+            "FROM UserCurrency AS uc WHERE uc.user = :user AND uc.status = 'normal'"
+    )
+    Long countExchangeRequestByUser(@Param("user") User user);
+
+    @Query("SELECT SUM(uc.amountInKrw) "+
+            "FROM UserCurrency AS uc WHERE uc.user = :user AND uc.status = 'normal'"
+    )
+    BigDecimal totalAmountKrwByUser(@Param("user") User user);
 }

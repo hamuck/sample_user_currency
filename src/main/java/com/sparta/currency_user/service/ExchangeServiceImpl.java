@@ -2,17 +2,16 @@ package com.sparta.currency_user.service;
 
 import com.sparta.currency_user.dto.ExchangeRequestDto;
 import com.sparta.currency_user.dto.ExchangeResponseDto;
+import com.sparta.currency_user.dto.UserExchangeGroupResponseDto;
 import com.sparta.currency_user.entity.Currency;
 import com.sparta.currency_user.entity.User;
 import com.sparta.currency_user.entity.UserCurrency;
 import com.sparta.currency_user.exception.CurrencyNotFoundException;
 import com.sparta.currency_user.exception.ExchangeRequestEmptyException;
-import com.sparta.currency_user.exception.GlobalExceptionHandler;
 import com.sparta.currency_user.exception.UserNotFountException;
 import com.sparta.currency_user.repository.CurrencyRepository;
-import com.sparta.currency_user.repository.ExchangeRepository;
+import com.sparta.currency_user.repository.UserCurrencyRepository;
 import com.sparta.currency_user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ExchangeServiceImpl implements ExchangeService {
-    private final ExchangeRepository exchangeRepository;
+    private final UserCurrencyRepository userCurrencyRepository;
     private final CurrencyRepository currencyRepository;
     private final UserRepository userRepository;
 
@@ -42,7 +41,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
         UserCurrency userCurrency = new UserCurrency(user,currency,dto.getAmountInKrw(),afterExchange,"normal");
 
-        userCurrency = exchangeRepository.save(userCurrency);
+        userCurrency = userCurrencyRepository.save(userCurrency);
 
         return new ExchangeResponseDto(
                 userCurrency.getId(),userCurrency.getUser().getId(),
@@ -57,7 +56,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 ()-> new UserNotFountException("유저 정보가 존재하지 않습니다. 유저 id: " + id)
         );
         List<ExchangeResponseDto> exchangeResponseDtoList =
-                exchangeRepository.findAllByUser(user);
+                userCurrencyRepository.findAllByUser(user);
 
         if (exchangeResponseDtoList.isEmpty()) {
             throw new ExchangeRequestEmptyException("환전 요청이 존재하지 않습니다. 유저 id: "+id);
@@ -69,18 +68,26 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Override
     @Transactional
     public ExchangeResponseDto updateStatus(Long id) {
-        UserCurrency userCurrency = exchangeRepository.findById(id).orElseThrow(
+        UserCurrency userCurrency = userCurrencyRepository.findById(id).orElseThrow(
                 ()-> new ExchangeRequestEmptyException("환전 요청이 존재하지 않습니다. 유저 id: "+id)
         );
 
         userCurrency.setStatus();
-        exchangeRepository.save(userCurrency);
+        userCurrencyRepository.save(userCurrency);
 
         return new ExchangeResponseDto(
                 userCurrency.getId(),userCurrency.getUser().getId(),
                 userCurrency.getCurrency().getCurrencyName(),userCurrency.getAmountInKrw(),
                 userCurrency.getAmountAfterExchange(),userCurrency.getStatus()
         );
+    }
+
+    @Override
+    public UserExchangeGroupResponseDto findExchangeGroup(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                ()-> new UserNotFountException("유저 정보가 존재하지 않습니다. 유저 id: " + userId)
+        );
+        return new UserExchangeGroupResponseDto(userCurrencyRepository.countExchangeRequestByUser(user), userCurrencyRepository.totalAmountKrwByUser(user));
     }
 
     private BigDecimal amountAfterExchange(Long krw, Long currencyId) {
