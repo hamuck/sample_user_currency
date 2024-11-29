@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+//예외 발생시 메세지를 형식에 맞게 반환
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

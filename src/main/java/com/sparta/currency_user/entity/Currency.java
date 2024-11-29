@@ -18,6 +18,7 @@ public class Currency {
     private BigDecimal exchangeRate;
     private String symbol;
 
+    //영속성 설정
     @OneToMany(mappedBy = "currency",cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<UserCurrency> userCurrencyList = new ArrayList<>();
 

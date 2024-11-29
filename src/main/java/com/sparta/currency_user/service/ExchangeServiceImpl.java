@@ -27,9 +27,11 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final CurrencyRepository currencyRepository;
     private final UserRepository userRepository;
 
+    //환전 요청을 저장
     @Override
     @Transactional
     public ExchangeResponseDto save(ExchangeRequestDto dto) {
+        //유저와 통화 정보를 확인
         User user = userRepository.findById(dto.getUserId()).orElseThrow(
                 ()-> new UserNotFountException("유저 정보가 존재하지 않습니다. 유저 id: " + dto.getUserId())
         );
@@ -37,10 +39,11 @@ public class ExchangeServiceImpl implements ExchangeService {
                 ()-> new CurrencyNotFoundException("통화 정보가 존재하지 않습니다. 통화 id: " + dto.getToCurrencyId())
         );
 
+        // amountAfterExchange 메서드를 사용해 환전 후 값 구하기
         BigDecimal afterExchange = amountAfterExchange(dto.getAmountInKrw(), currency.getId());
 
+        //입력받은 정보로 UserCurrency 객체 생성, repository에 저장
         UserCurrency userCurrency = new UserCurrency(user,currency,dto.getAmountInKrw(),afterExchange,"normal");
-
         userCurrency = userCurrencyRepository.save(userCurrency);
 
         return new ExchangeResponseDto(
@@ -50,6 +53,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 );
     }
 
+    //유저 고유 번호로 환전 요청 정보 조회
     @Override
     public List<ExchangeResponseDto> findByUserId(Long id) {
         User user = userRepository.findById(id).orElseThrow(
@@ -61,10 +65,10 @@ public class ExchangeServiceImpl implements ExchangeService {
         if (exchangeResponseDtoList.isEmpty()) {
             throw new ExchangeRequestEmptyException("환전 요청이 존재하지 않습니다. 유저 id: "+id);
         }
-
         return exchangeResponseDtoList;
     }
 
+    //상태를 normal > cancelled 로 변경
     @Override
     @Transactional
     public ExchangeResponseDto updateStatus(Long id) {
@@ -72,7 +76,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 ()-> new ExchangeRequestEmptyException("환전 요청이 존재하지 않습니다. 유저 id: "+id)
         );
 
-        userCurrency.setStatus();
+        userCurrency.setStatusCancelled();
         userCurrencyRepository.save(userCurrency);
 
         return new ExchangeResponseDto(
@@ -82,6 +86,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         );
     }
 
+    //유저 정보로 조회한 환전 요청을 요청 수 , 환전 요청 krw 총 합 형식으로 반환
     @Override
     public UserExchangeGroupResponseDto findExchangeGroup(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -90,6 +95,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         return new UserExchangeGroupResponseDto(userCurrencyRepository.countExchangeRequestByUser(user), userCurrencyRepository.totalAmountKrwByUser(user));
     }
 
+    //환전 계산 메서드
     private BigDecimal amountAfterExchange(Long krw, Long currencyId) {
         Currency currency = currencyRepository.findById(currencyId).orElseThrow(
                 ()-> new CurrencyNotFoundException("통화 정보가 존재하지 않습니다. 통화 id: " + currencyId)

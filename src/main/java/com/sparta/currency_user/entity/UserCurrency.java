@@ -30,9 +30,6 @@ public class UserCurrency extends BaseEntity {
 
     private String status = "normal";
 
-    @Version
-    private Long version = 0L;
-
     public UserCurrency() {}
 
     public UserCurrency(User user, Currency currency, Long amountInKrw, BigDecimal amountAfterExchange, String status) {
@@ -43,7 +40,7 @@ public class UserCurrency extends BaseEntity {
         this.status = status;
     }
 
-    public void setStatus(){
+    public void setStatusCancelled(){
         this.status = "cancelled";
     }
 
